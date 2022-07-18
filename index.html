@@ -3,22 +3,23 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | %UNITY_WEB_NAME%</title>
+    <title>Unity WebGL Player | WebXR</title>
     <meta name="description" content="%UNITY_CUSTOM_DESCRIPTION%">
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <script src="TemplateData/UnityProgress.js"></script>
-    <script src="{{{UNITY_WEBGL_LOADER_URL}}}"></script>
+    <script src="%UNITY_WEBGL_LOADER_URL%"></script>
     <script>
-      UnityLoader.compatibilityCheck = function (unityInstance, onsuccess, onerror) {
-        if (!UnityLoader.SystemInfo.hasWebGL) {
+      const loaderUrl = buildUrl + "/Animal Build.loader.js";
+      loaderUrl.compatibilityCheck = function (unityInstance, onsuccess, onerror) {
+        if (!loaderUrl.SystemInfo.hasWebGL) {
           unityInstance.popup('Your browser does not support WebGL',
             [{text: 'OK', callback: onerror}]);
         } else {
           onsuccess();
         }
       }
-      var unityInstance = UnityLoader.instantiate("unityContainer", "{{{UNITY_WEBGL_BUILD_URL}}}", {onProgress: UnityProgress});
+      var unityInstance = loaderUrl.instantiate("unityContainer", "%UNITY_WEBGL_BUILD_URL%", {onProgress: UnityProgress});
     </script>
   </head>
   <body>
@@ -28,7 +29,8 @@
         <div class="webgl-logo"></div>
         <button class="entervr" id="entervr" value="Enter VR" disabled>VR</button>
         <button class="enterar" id="enterar" value="Enter AR" disabled>AR</button>
-        <div class="title">%UNITY_WEB_NAME%</div>
+        <div class="webxr-link">From <a href="https://www.youtube.com/channel/UCCxGucNZMsIEQ_qc51gf72w?view_as=subscriber" target="_blank" title="WebXR Export">AllinReality</a></div>
+        <div class="title">WebXR</div>
       </div>
     </div>
     <script>

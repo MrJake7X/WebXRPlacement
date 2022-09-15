@@ -89,14 +89,14 @@
         var db = indexedDB.open("dummy_indexdb", 1); // iOS 14.6 fix; the call to open indexdb hangs forever otherwise
         window.zappar=ZCV.initialize();
         const loader = document.querySelector("#loader");
-        var gameInstance; //= UnityLoader.instantiate("gameContainer", "Build/Prototype.json", { onProgress: UnityProgress }); 
+        var gameInstance; //= UnityLoader.instantiate("gameContainer", "Build/tarjeta 2.json", { onProgress: UnityProgress }); 
 
         window.zappar.permission_request_ui_promise().then(WaitForZCVLoad);
 
         function WaitForZCVLoad(){            
             if (zappar.loaded()) { 
                 //loader.style.display = "none";  
-                gameInstance= UnityLoader.instantiate("gameContainer", "Build/Prototype.json", { onProgress: UnityProgress }); 
+                gameInstance= UnityLoader.instantiate("gameContainer", "Build/tarjeta 2.json", { onProgress: UnityProgress }); 
                 return; 
             }
             setTimeout(WaitForZCVLoad, 500);

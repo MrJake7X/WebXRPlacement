@@ -60,11 +60,11 @@
     </div>
     <script>
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/receiver.loader.js";
+      var loaderUrl = buildUrl + "/Git.loader.js";
       var config = {
-        dataUrl: buildUrl + "/receiver.data.unityweb",
-        frameworkUrl: buildUrl + "/receiver.framework.js.unityweb",
-        codeUrl: buildUrl + "/receiver.wasm.unityweb",
+        dataUrl: buildUrl + "/Git.data.unityweb",
+        frameworkUrl: buildUrl + "/Git.framework.js.unityweb",
+        codeUrl: buildUrl + "/Git.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "image-tracking-3d-animation",
@@ -91,7 +91,7 @@
             //config.matchWebGLToCanvasSize = false;    
             //set devicePixelRatio=1; to avoid draining fillrate performance on mobile and override low DPI mode
             config.devicePixelRatio = window.devicePixelRatio;
-      }
+        }
 
       // loadingBar.style.display = "block";
 
@@ -101,7 +101,14 @@
         createUnityInstance(canvas, config, (progress) => {
           progressBarFull.style.width = 100 * progress + "%";
         }).then((instance) => {
-            unityInstance = instance;
+          unityInstance = instance;
+          logosPanel.style.display = "none";
+          
+          if ( CheckIOSDevice() )
+          { 
+            SetPhotocallInIOSMode(); 
+          }
+
             loadingBar.style.display = "none";
             OnOrientationChange();
 
@@ -119,36 +126,38 @@
             return flag;
       }
 
-      function ForceFocusWindow()
-      {
-        window.focus();
-        recoverFocusDiv.style.display = "none";
-        ForceFullscreen();
-      }
-
-      function StopPropagation(event)
-      {
-           event.stopPropagation();
-      }
-
       function SetDisplayPCWarningPanel(flag) 
       {          
         if(flag === true)
         { 
-            pcWarningPanel.style.display = "block";   
+            if(unityInstance!=null)
+            {
+                unityInstance.SendMessage("Canvas","OnPortrail"); 
+            }
+             pcWarningPanel.style.display = "block";   
         } 
         else 
         {
             pcWarningPanel.style.display = "none";
         }
-      }
+    }
 
     function ShowVerticalWarningPanel() {  
+         
+        if(unityInstance!=null)
+        {
+            unityInstance.SendMessage("Canvas","OnPortrail"); 
+        }
 
         verticalPanel.style.display = "block";
     }
 
     function HideVerticalWarningPanel() {    
+         
+        if(unityInstance!=null)
+        {
+            unityInstance.SendMessage("Canvas","OnLandscape"); 
+        }
 
         verticalPanel.style.display = "none";
     }
@@ -160,46 +169,44 @@
         else
             return "landscape";
     }
-           
-    function GetOrientation()
-    {
+
+    var orientation = "";      
+    function OnOrientationChange() 
+    {   
         if (CheckIOSDevice())
         {
-            return getScreenOrientationIOS();
+            orientation = getScreenOrientationIOS();
         }
         else
         {
-            return screen.orientation.type;
+            orientation = screen.orientation.type;
         }
-    }
-    
-    var orientation = "";    
-    
-    function OnOrientationChange() {  
-    
-        var orientation = GetOrientation();
+        
         console.log("Orientation:",orientation);
-            switch (orientation) 
-         {
+
+        switch (orientation) 
+        {
               case "landscape-primary":
               case "landscape-secondary":
               case "landscape":
-                HideVerticalWarningPanel();    
-
-               
+                HideVerticalWarningPanel();
+                //Update iOS Canvas Size
+                if (CheckIOSDevice() && unityInstance != null)
+                { 
+                    SetPhotocallInIOSMode(); 
+                }
                 break;
 
               case "portrait-secondary":  
-              case "portrait-primary":  
+              case "portrait-primary":
               case "portrait":
                 ShowVerticalWarningPanel();
                 break;
               default:
                 console.log("The orientation API isn't supported in this browser :(");
-         }
+        }
     }
 
-    
     function FullScreen() {  
 
         if(!document.fullscreen)
@@ -226,7 +233,6 @@
                 });
         }
     }    
-    
 
     const RecoverFullscreen = () => 
     {
@@ -249,19 +255,13 @@
 
         container.requestFullscreen({ navigationUI: "show" })
             .then(function() {
-                isFullscreen = true;      
-                
-                if(unityInstance!=null)
-                {     
-                    console.log("canvas updated");
-                    setTimeout(()=>{unityInstance.SendMessage("Canvas","ForceUpdateCanvases");}, 1000);               
-                }
+                isFullscreen = true;
         })
         .catch(err => {
         console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
         });        
     }
-    
+     
     const ForceMinimizeFullscreen = () => 
     {
         if (CheckIOSDevice()) {
@@ -277,7 +277,12 @@
 	        console.log(error.message);
         });      
     }
-    
+
+    function SendMessageOnFullscreenChange()
+    {
+        if(unityInstance != null)
+        unityInstance.SendMessage('Canvas', 'OnFullscreenChange');
+    }
 
     function MobileAndTabletCheck() {
         var check = false;
@@ -297,86 +302,63 @@
         //Show PC warning
         SetDisplayPCWarningPanel(true);
     }
+        
+    function SetPhotocallInIOSMode()
+    {                                      
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        var obj = { W: w, H: h};
+        var jsonResult = JSON.stringify(obj);
+        unityInstance.SendMessage("Canvas","OnIOSReciver",jsonResult); 
+    }        
+    
+
+    addEventListener('fullscreenchange', (event) => 
+        {  
+            console.log("Event fullscreen changed");
+            switch (orientation) 
+            {
+              case "landscape-primary":
+              case "landscape-secondary":
+              case "landscape":
+                //Delay 1 sec
+                setTimeout(SendMessageOnFullscreenChange, 100);
+              break;
+              default:break;
+            }
+        });
 
     window.addEventListener('orientationchange', function() 
     {
         var afterOrientationChange = function() 
         {
+            console.log("Event orientation changed");
             OnOrientationChange();
             window.removeEventListener('resize', afterOrientationChange);
         };
             window.addEventListener('resize', afterOrientationChange);
     });
-
-
-        var clickValue = "Empty";
-
-        function ExternalCastClick(value) {
+  
+    
+        function ExternalCastClick (value) {
             clickValue = value;
+            console.log(value);
         }
 
-          var fileInput = document.createElement('input');
-          fileInput.setAttribute('type', 'file');
-          fileInput.setAttribute('accept', 'image/png, image/jpeg');
-          fileInput.setAttribute('id', 'ImageUploaderInput');
-          fileInput.style.opacity = 0;   
-          fileInput.style.display = "none";       
-          fileInput.style.position = "absolute";
-          fileInput.style.width = "100px";
-          fileInput.style.height = "100px";
-          fileInput.style.top = "0px";
-          fileInput.style.left =  "0px";
-          document.body.appendChild(fileInput);
-          fileInput.onclick = function (event) {
-          this.value = null;
-        };
 
-        fileInput.onchange = function (event) 
-        {
-            var file = event.target.files[0];
-
-            if (file) 
-            {
-                if (/^image\//i.test(file.type)) {
-                   unityInstance.SendMessage('Canvas', 'FileSelected', URL.createObjectURL(file));
-                } else {
-                  unityInstance.SendMessage('Canvas', 'FileSelected', 'Invalid image');
-                }
-            } 
-        }
-
-    document.addEventListener("DOMContentLoaded", ()=>{           
+        document.addEventListener("DOMContentLoaded", ()=>{           
             unity_canvas = document.querySelector("#unity-container");
-            canvas.ontouchstart = (event)=>
-            {
-                var touch = getTouchPos(event);
-                
-                  fileInput.style.top = touch.x +"px";
-                  fileInput.style.left = touch.y + "px";
-            };
-            
-                canvas.ontouchend = ()=>{
+            canvas.ontouchstart = ()=>{ console.log("Canvas touch start") };
+            canvas.ontouchend = ()=>{
+                console.log("Canvas touch end")
                 setTimeout(() => {
-                    if (clickValue != "Empty")  
-                    {
-                        var input = document.getElementById('ImageUploaderInput');
-                        input.click();
-                        input.style.display = "none";
-                    }
+                    console.log("Input: " + clickValue);
+                    if (clickValue != "Empty") ImageUploaderCaptureClick();
                     clickValue = "Empty";
                 }, 50);
-            };           
-    });
-
-    // Get the position of a touch relative to the canvas
-    function getTouchPos(touchEvent) {
-      var rect = canvas.getBoundingClientRect();
-      return {
-        x: touchEvent.touches[0].clientX - rect.left,
-        y: touchEvent.touches[0].clientY - rect.top
-      };
-    }
+            };
+            canvas.onclick = ()=>{ console.log("Canvas click") };
+        });
     </script>
- <noscript>Sorry, your browser does not support JavaScript!</noscript>
   </body>
 </html>

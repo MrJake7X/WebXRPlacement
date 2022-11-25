@@ -282,6 +282,7 @@
         function WaitForZCVLoad() {
             if (zappar.loaded()) {
                 console.log("Navigator AppVersion: " + navigator.appVersion);
+                console.log("Navigator userAgent: " + navigator.userAgent);
                 CreateUnityLoader();
                 return;
             }

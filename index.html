@@ -295,7 +295,7 @@
                     var ver = iOSversion();
                     console.log("Ver: "+ ver);
                     if(ver[0] <= 12 || (ver[0] == 15 && ver[1] == 4)) {
-                        console.warning("This version it's not supported");
+                        console.warn("This version it's not supported");
                         return;
                     }
                     else {

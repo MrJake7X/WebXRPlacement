@@ -294,7 +294,7 @@
                 if(/iPhone|iPad|iPod|/i.test(navigator.userAgent)) {
                     console.log("Is iOS");
                     var ver = iOSversion();
-                    console.log("Ver: "+ ver[0]);
+                    console.log("Ver: "+ ver);
                     if(ver[0] <= 12 || ver[0] == 15.4) {
                         console.warning("This version it's not supported");
                         return;

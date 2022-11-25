@@ -279,13 +279,23 @@
 
         window.zappar.permission_request_ui_promise().then(WaitForZCVLoad);
 
+        function iOSversion() {
+          if (/iP(hone|od|ad)/.test(navigator.platform)) {
+            // supports iOS 2.0 and later: <http://bit.ly/TJjs1V>
+            var v = (navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/);
+            return [parseInt(v[1], 10), parseInt(v[2], 10), parseInt(v[3] || 0, 10)];
+          }
+        }
+
         function WaitForZCVLoad() {
             if (zappar.loaded()) {
                 console.log("Navigator AppVersion: " + navigator.appVersion);
                 console.log("Navigator userAgent: " + navigator.userAgent);
                 if(/iPhone|iPad|iPod|/i.test(navigator.userAgent)) {
                     console.log("Is iOS");
-                    if(navigator.appVersion <= 12.0 || navigator.appVersion == 15.4) {
+                    var ver = iOSversion();
+                    console.log("Ver: "+ ver[0]);
+                    if(ver[0] <= 12 || ver[0] == 15.4) {
                         console.warning("This version it's not supported");
                         return;
                     }

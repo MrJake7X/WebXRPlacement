@@ -249,11 +249,11 @@
         var db = indexedDB.open("dummy_indexdb", 1); // iOS 14.6 fix; the call to open indexdb hangs forever otherwise
 
         const buildUrl = "Build";
-        const loaderUrl = buildUrl + "/emisor.loader.js";
+        const loaderUrl = buildUrl + "/Git.loader.js";
         const config = {
-            dataUrl: buildUrl + "/emisor.data.unityweb",
-            frameworkUrl: buildUrl + "/emisor.framework.js.unityweb",
-            codeUrl: buildUrl + "/emisor.wasm.unityweb",
+            dataUrl: buildUrl + "/Git.data.unityweb",
+            frameworkUrl: buildUrl + "/Git.framework.js.unityweb",
+            codeUrl: buildUrl + "/Git.wasm.unityweb",
             streamingAssetsUrl: "StreamingAssets",
             companyName: "DefaultCompany",
             productName: "image-tracking-3d-animation",
@@ -281,7 +281,7 @@
 
         function WaitForZCVLoad() {
             if (zappar.loaded()) {
-                console.log(navigator.appVersion);
+                console.log("Navigator AppVersion: " + navigator.appVersion);
                 CreateUnityLoader();
                 return;
             }

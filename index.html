@@ -283,8 +283,19 @@
             if (zappar.loaded()) {
                 console.log("Navigator AppVersion: " + navigator.appVersion);
                 console.log("Navigator userAgent: " + navigator.userAgent);
-                CreateUnityLoader();
-                return;
+                if(/iPhone|iPad|iPod|/i.test(navigator.userAgent)) {
+                    if(navigator.appVersion <= 12 || navigator.appVersion == 15.4) {
+                        return;
+                    }
+                    else {
+                        CreateUnityLoader();
+                        return;
+                    }
+                }
+                else {
+                    CreateUnityLoader();
+                    return;
+                }
             }
             setTimeout(WaitForZCVLoad, 500);
         }        
